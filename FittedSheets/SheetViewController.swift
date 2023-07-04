@@ -562,7 +562,7 @@ public class SheetViewController: UIViewController {
     }
     
     public func resize(to size: SheetSize,
-                       duration: TimeInterval = 0.2,
+                       duration: TimeInterval = 0.4,
                        options: UIView.AnimationOptions = [.curveEaseOut],
                        animated: Bool = true,
                        complete: (() -> Void)? = nil) {
@@ -579,10 +579,17 @@ public class SheetViewController: UIViewController {
         }
         
         if animated {
-            UIView.animate(withDuration: duration, delay: 0, options: options, animations: { [weak self] in
-                guard let self = self, let constraint = self.contentViewHeightConstraint else { return }
-                constraint.constant = newHeight
-                self.contentViewController.view.layoutIfNeeded()
+            self.contentViewHeightConstraint.constant = newHeight
+            self.contentViewController.view.layoutIfNeeded()
+            
+            UIView.animate(
+                withDuration: duration,
+                delay: 0,
+                usingSpringWithDamping: self.options.transitionDampening,
+                initialSpringVelocity: self.options.transitionVelocity,
+                options: options,
+                animations: {
+                self.view.layoutIfNeeded()
             }, completion: { _ in
                 if previousSize != size {
                     self.sizeChanged?(self, size, newHeight)
